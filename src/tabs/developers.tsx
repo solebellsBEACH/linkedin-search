@@ -10,7 +10,7 @@ const SENIORITY_MAP: Record<string, string[]> = {
 
 const CONTENT_KEYWORDS = {
   latam: ["vaga", "contratando", "oportunidade"],
-  gringa: ["hiring", "job", "opportunity"],
+  internacional: ["hiring", "job", "opportunity"],
   all: ["vaga", "contratando", "oportunidade", "hiring", "job", "opportunity"],
 }
 
@@ -70,10 +70,10 @@ export function DevelopersTab() {
       </Select>
 
       {tab === "content" && (
-        <Select label="Tipo de vaga:" value={tipoVaga} onChange={setTipoVaga}>
+        <Select label="Localidade:" value={tipoVaga} onChange={setTipoVaga}>
           <option value="all">Todas</option>
           <option value="latam">LATAM</option>
-          <option value="gringa">Internacionais</option>
+          <option value="internacional">Internacionais</option>
         </Select>
       )}
 

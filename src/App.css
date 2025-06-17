@@ -4,14 +4,8 @@
 }
 
 .container {
-    width: 15rem;
-    height: 15rem;
-    background-color: green;
-}
-
-.container {
-  width: 300px;
-  padding: 20px;
+  min-width: 300px;
+  padding: 10px 20px;
   font-family: Arial, sans-serif;
   background-color: #f7f9fa;
   border-radius: 8px;
@@ -24,21 +18,6 @@
   text-align: center;
 }
 
-.label {
-  display: block;
-  margin-bottom: 12px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.input {
-  width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-top: 4px;
-  font-size: 13px;
-}
 
 .button {
   width: 100%;
