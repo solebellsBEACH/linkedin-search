@@ -35,3 +35,21 @@
 .button:hover {
   background-color: #005f90;
 }
+
+nav {
+  margin-bottom: 10px;
+}
+
+nav button {
+  margin-right: 8px;
+  padding: 6px 12px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+nav button.active {
+  background: #0073b1;
+  color: white;
+}
