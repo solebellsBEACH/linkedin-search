@@ -4,8 +4,52 @@
 }
 
 .container {
-    width: 15rem;
-    height: 15rem;
-    background-color: green;
+  min-width: 300px;
+  padding: 10px 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f7f9fa;
+  border-radius: 8px;
+}
 
+.title {
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+
+.button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  background-color: #0072b1;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.button:hover {
+  background-color: #005f90;
+}
+
+nav {
+  margin-bottom: 10px;
+}
+
+nav button {
+  margin-right: 8px;
+  padding: 6px 12px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+nav button.active {
+  background: #0073b1;
+  color: white;
 }

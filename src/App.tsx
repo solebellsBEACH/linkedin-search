@@ -1,69 +1,37 @@
-import React, { useState } from "react"
+import { useState } from "react";
+import { DevelopersTab } from "./tabs/developers";
+import { QaTab } from "./tabs/qa-tab";
+import { DesignTab } from "./tabs/design-tab";
+import './App.css'
 
 export default function Popup() {
-  const [tab, setTab] = useState("jobs")
-  const [tech, setTech] = useState("")
-  const [seniority, setSeniority] = useState("")
+  const [activeTab, setActiveTab] = useState("developers");
 
-  const handleSearch = () => {
-    const keywords = [tech, seniority].filter(Boolean).join(" ")
-    const url =
-      tab === "jobs"
-        ? `https://www.linkedin.com/search/results/jobs/?keywords=${encodeURIComponent(keywords)}`
-        : `https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent(keywords)}`
-    chrome.tabs.create({ url })
-  }
+  const renderTab = () => {
+    switch (activeTab) {
+      case "developers":
+        return <DevelopersTab />;
+      case "qa":
+        return <QaTab />;
+      case "design":
+        return <DesignTab />;
+      default:
+        return <DevelopersTab />;
+    }
+  };
 
   return (
-    <div style={{ width: 280, padding: 16, fontFamily: "Arial, sans-serif" }}>
-      <label>
-        Escolha a aba:
-        <select
-          value={tab}
-          onChange={e => setTab(e.target.value)}
-          style={{ width: "100%", marginTop: 8, padding: 6 }}
-        >
-          <option value="jobs">Vagas</option>
-          <option value="content">Publicações</option>
-        </select>
-      </label>
+    <div className="container">
+      <h3 className="title">🔎 Busca no LinkedIn</h3>
+      <nav>
+        <button onClick={() => setActiveTab("developers")} className={activeTab === "developers" ? "active" : ""}>Desenvolvedores</button>
+        <button onClick={() => setActiveTab("qa")} className={activeTab === "qa" ? "active" : ""}>QA</button>
+        <button onClick={() => setActiveTab("design")} className={activeTab === "design" ? "active" : ""}>Design</button>
+      </nav>
 
-      <label style={{ display: "block", marginTop: 12 }}>
-        Tecnologia:
-        <input
-          type="text"
-          placeholder="React, Angular..."
-          value={tech}
-          onChange={e => setTech(e.target.value)}
-          style={{ width: "100%", marginTop: 6, padding: 6 }}
-        />
-      </label>
-
-      <label style={{ display: "block", marginTop: 12 }}>
-        Senioridade:
-        <input
-          type="text"
-          placeholder="Senior, SR..."
-          value={seniority}
-          onChange={e => setSeniority(e.target.value)}
-          style={{ width: "100%", marginTop: 6, padding: 6 }}
-        />
-      </label>
-
-      <button
-        onClick={handleSearch}
-        style={{
-          marginTop: 20,
-          width: "100%",
-          padding: 10,
-          backgroundColor: "#0072b1",
-          color: "#fff",
-          border: "none",
-          cursor: "pointer"
-        }}
-      >
-        Pesquisar no LinkedIn
-      </button>
+      <section>
+        {renderTab()}
+      </section>
     </div>
-  )
+  );
 }

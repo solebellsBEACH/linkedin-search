@@ -21,7 +21,8 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "watch": "webpack -w --config webpack.config.js"
+    "watch": "webpack -w --config webpack.config.js",
+    "re-build": "rm -r dist && yarn build"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.326",
