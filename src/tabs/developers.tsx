@@ -6,80 +6,85 @@ const SENIORITY_MAP: Record<string, string[]> = {
   Junior: ["Junior", "JR", "Entry"],
   Pleno: ["Pleno", "Mid", "PL"],
   Senior: ["Senior", "SR"],
-}
-
-const CONTENT_KEYWORDS = {
-  latam: ["vaga", "contratando", "oportunidade"],
-  internacional: ["hiring", "job", "opportunity"],
-  all: ["vaga", "contratando", "oportunidade", "hiring", "job", "opportunity"],
+  Estágio: ["Estagiário", "Estágio", "Intern"],
 }
 
 export function DevelopersTab() {
   const [tab, setTab] = useState("jobs")
   const [tech, setTech] = useState("React")
   const [seniority, setSeniority] = useState("Junior")
-  const [tipoVaga, setTipoVaga] = useState("all")
+  const [regiao, setRegiao] = useState("")
+  const [tipoContrato, setTipoContrato] = useState("")
 
   const buildQuery = () => {
     const techFormatted = tech.trim()
+    const regionFormatted = regiao.trim()
+    const contractFormatted = tipoContrato.trim()
     const seniorities = SENIORITY_MAP[seniority] || [seniority]
+
+    const techQuery =
+      techFormatted.toLowerCase().includes("front")
+        ? `("Frontend" OR "Front")`
+        : `("${techFormatted}")`
+
     const seniorityQuery = `(${seniorities.map(s => `"${s}"`).join(" OR ")})`
 
-    if (tab === "jobs") {
-      if (tech.toLowerCase().includes("front")) {
-        return `("Front" OR "Frontend") AND ${seniorityQuery}`
-      }
-      return `"${techFormatted}" AND ${seniorityQuery}`
-    }
+    const contractQuery = contractFormatted ? `("${contractFormatted}")` : ""
+    const regionQuery = regionFormatted ? `("${regionFormatted}")` : ""
 
-    const baseWords = CONTENT_KEYWORDS[tipoVaga as keyof typeof CONTENT_KEYWORDS]
-    const pubQuery = `(${baseWords.map(w => `"${w}"`).join(" OR ")})`
-    return `${pubQuery} AND "${techFormatted}" AND "${seniorities[0]}"`
+    const terms = [techQuery, seniorityQuery, contractQuery, regionQuery].filter(Boolean)
+    return terms.join(" AND ")
   }
-
   const handleSearch = () => {
     const query = buildQuery()
     const encoded = encodeURIComponent(query)
 
     const url =
       tab === "jobs"
-        ? `https://www.linkedin.com/jobs/search/?currentJobId=&geoId=&keywords=${encoded}&origin=JOBS_HOME_SEARCH_BUTTON&refresh=true`
-        : `https://www.linkedin.com/search/results/content/?keywords=${encoded}`
+        ? `https://www.linkedin.com/jobs/search/?keywords=${encoded}&origin=JOBS_HOME_SEARCH_BUTTON`
+        : `https://www.linkedin.com/search/results/content/?keywords=${encoded}&sortBy=DATE_POSTED`
 
     chrome.tabs.create({ url })
   }
 
   return (
     <>
-          <Select label="Aba:" value={tab} onChange={setTab}>
+      <Select label="Aba:" value={tab} onChange={setTab}>
         <option value="jobs">Vagas</option>
         <option value="content">Publicações</option>
       </Select>
 
       <Input
         label="Tecnologia:"
-        placeholder="React, Frontend..."
+        placeholder="React, QA, Frontend..."
         value={tech}
         onChange={setTech}
       />
 
       <Select label="Senioridade:" value={seniority} onChange={setSeniority}>
+        <option value="Estágio">Estágio</option>
         <option value="Junior">Junior</option>
         <option value="Pleno">Pleno</option>
         <option value="Senior">Senior</option>
       </Select>
 
-      {tab === "content" && (
-        <Select label="Localidade:" value={tipoVaga} onChange={setTipoVaga}>
-          <option value="all">Todas</option>
-          <option value="latam">LATAM</option>
-          <option value="internacional">Internacionais</option>
-        </Select>
-      )}
+      <Input
+        label="Tipo de vaga:"
+        placeholder="CLT, PJ, Estágio, Freela..."
+        value={tipoContrato}
+        onChange={setTipoContrato}
+      />
 
-    <button onClick={handleSearch} className="button">
-      Buscar no LinkedIn
-    </button>
+      <Input
+        label="Região/Cidade:"
+        placeholder="Remoto, São Paulo, Europa..."
+        value={regiao}
+        onChange={setRegiao}
+      />
+
+      <button onClick={handleSearch} className="button">
+        Buscar no LinkedIn
+      </button>
     </>
   )
 }
