@@ -1,12 +1,12 @@
 import React from "react"
 import { useForm, Controller } from "react-hook-form"
-import { Select } from "../components/select"
-import { Input } from "../components/input"
-import { DeveloperFormValues } from "../shared/types/developer"
-import { onSubmit } from "../shared/utils/query"
+import { DeveloperFormValues } from "../../shared/types/developer"
+import { onSubmit } from "../../shared/utils/query"
+import { Select } from "../select"
+import { Input } from "../input"
 
+export function TecnicalForm() {
 
-export function DevelopersTab() {
   const { handleSubmit, control, watch } = useForm<DeveloperFormValues>({
     defaultValues: {
       tab: "jobs",
