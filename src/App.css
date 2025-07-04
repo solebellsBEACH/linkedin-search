@@ -3,9 +3,18 @@
     text-align: center;
 }
 
+body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* padding: 1vh 0; */
+
+  background-color: #3f4244;
+}
+
 .container {
-  min-width: 300px;
-  padding: 10px 20px;
+  width: 350px;
+  padding: 10px 30px;
   font-family: Arial, sans-serif;
   background-color: #f7f9fa;
   border-radius: 8px;

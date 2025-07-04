@@ -21,16 +21,16 @@ export default function Popup() {
   };
 
   return (
-    <div className="container">
+    <div>
       <h3 className="title">🔎 Busca no LinkedIn</h3>
-      <nav>
+      {/* <nav>
         <button onClick={() => setActiveTab("developers")} className={activeTab === "developers" ? "active" : ""}>Desenvolvedores</button>
         <button onClick={() => setActiveTab("qa")} className={activeTab === "qa" ? "active" : ""}>QA</button>
         <button onClick={() => setActiveTab("design")} className={activeTab === "design" ? "active" : ""}>Design</button>
-      </nav>
+      </nav> */}
 
       <section>
-        {renderTab()}
+       <DevelopersTab />
       </section>
     </div>
   );

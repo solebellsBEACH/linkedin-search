@@ -1,6 +1,8 @@
-import React, { useState } from "react"
+import React from "react"
+import { useForm, Controller } from "react-hook-form"
 import { Select } from "../components/select"
 import { Input } from "../components/input"
+import { redirectUrl } from "../shared/utils/chrome"
 
 const SENIORITY_MAP: Record<string, string[]> = {
   Junior: ["Junior", "JR", "Entry"],
@@ -9,82 +11,120 @@ const SENIORITY_MAP: Record<string, string[]> = {
   Estágio: ["Estagiário", "Estágio", "Intern"],
 }
 
+type FormValues = {
+  tab: string
+  tech: string
+  seniority: string
+  tipoContrato: string
+  regiao: string
+}
+
 export function DevelopersTab() {
-  const [tab, setTab] = useState("jobs")
-  const [tech, setTech] = useState("React")
-  const [seniority, setSeniority] = useState("Junior")
-  const [regiao, setRegiao] = useState("")
-  const [tipoContrato, setTipoContrato] = useState("")
+  const { handleSubmit, control, watch } = useForm<FormValues>({
+    defaultValues: {
+      tab: "jobs",
+      tech: "React",
+      seniority: "Junior",
+      tipoContrato: "",
+      regiao: "",
+    },
+  })
 
-  const buildQuery = () => {
-    const techFormatted = tech.trim()
-    const regionFormatted = regiao.trim()
-    const contractFormatted = tipoContrato.trim()
-    const seniorities = SENIORITY_MAP[seniority] || [seniority]
+  const buildQuery = (data: FormValues) => {
+    const techFormatted = data.tech.trim()
+    const regionFormatted = data.regiao.trim()
+    const contractFormatted = data.tipoContrato.trim()
+    const seniorities = SENIORITY_MAP[data.seniority] || [data.seniority]
 
-    const techQuery =
-      techFormatted.toLowerCase().includes("front")
-        ? `("Frontend" OR "Front")`
-        : `("${techFormatted}")`
+    const techQuery = techFormatted.toLowerCase().includes("front")
+      ? `("Frontend" OR "Front")`
+      : `("${techFormatted}")`
 
     const seniorityQuery = `(${seniorities.map(s => `"${s}"`).join(" OR ")})`
-
     const contractQuery = contractFormatted ? `("${contractFormatted}")` : ""
     const regionQuery = regionFormatted ? `("${regionFormatted}")` : ""
 
     const terms = [techQuery, seniorityQuery, contractQuery, regionQuery].filter(Boolean)
     return terms.join(" AND ")
   }
-  const handleSearch = () => {
-    const query = buildQuery()
+
+  const onSubmit = (data: FormValues) => {
+    const query = buildQuery(data)
     const encoded = encodeURIComponent(query)
 
     const url =
-      tab === "jobs"
+      data.tab === "jobs"
         ? `https://www.linkedin.com/jobs/search/?keywords=${encoded}&origin=JOBS_HOME_SEARCH_BUTTON`
         : `https://www.linkedin.com/search/results/content/?keywords=${encoded}&sortBy=DATE_POSTED`
-
-    chrome.tabs.create({ url })
+    console.log(url, data)
+    redirectUrl( url )
   }
 
   return (
-    <>
-      <Select label="Aba:" value={tab} onChange={setTab}>
-        <option value="jobs">Vagas</option>
-        <option value="content">Publicações</option>
-      </Select>
-
-      <Input
-        label="Tecnologia:"
-        placeholder="React, QA, Frontend..."
-        value={tech}
-        onChange={setTech}
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <Controller
+        name="tab"
+        control={control}
+        render={({ field }) => (
+          <Select label="Aba:" {...field}>
+            <option value="jobs">Vagas</option>
+            <option value="content">Publicações</option>
+          </Select>
+        )}
       />
 
-      <Select label="Senioridade:" value={seniority} onChange={setSeniority}>
-        <option value="Estágio">Estágio</option>
-        <option value="Junior">Junior</option>
-        <option value="Pleno">Pleno</option>
-        <option value="Senior">Senior</option>
-      </Select>
-
-      <Input
-        label="Tipo de vaga:"
-        placeholder="CLT, PJ, Estágio, Freela..."
-        value={tipoContrato}
-        onChange={setTipoContrato}
+      <Controller
+        name="tech"
+        control={control}
+        render={({ field }) => (
+          <Input
+            label="Tecnologia:"
+            placeholder="React, QA, Frontend..."
+            {...field}
+          />
+        )}
       />
 
-      <Input
-        label="Região/Cidade:"
-        placeholder="Remoto, São Paulo, Europa..."
-        value={regiao}
-        onChange={setRegiao}
+      <Controller
+        name="seniority"
+        control={control}
+        render={({ field }) => (
+          <Select label="Senioridade:" {...field}>
+            <option value="Estágio">Estágio</option>
+            <option value="Junior">Junior</option>
+            <option value="Pleno">Pleno</option>
+            <option value="Senior">Senior</option>
+          </Select>
+        )}
       />
 
-      <button onClick={handleSearch} className="button">
+      <Controller
+        name="tipoContrato"
+        control={control}
+        render={({ field }) => (
+          <Input
+            label="Tipo de vaga:"
+            placeholder="CLT, PJ, Estágio, Freela..."
+            {...field}
+          />
+        )}
+      />
+
+      <Controller
+        name="regiao"
+        control={control}
+        render={({ field }) => (
+          <Input
+            label="Região/Cidade:"
+            placeholder="Remoto, São Paulo, Europa..."
+            {...field}
+          />
+        )}
+      />
+
+      <button type="submit" className="button">
         Buscar no LinkedIn
       </button>
-    </>
+    </form>
   )
 }

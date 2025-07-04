@@ -1,0 +1,4 @@
+- Form enviando vazio 
+- Tipo de vaga deve ser select 
+- remover regiao por enquanto 
+- add a funcionalidade de skip 
