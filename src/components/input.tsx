@@ -1,4 +1,4 @@
-import React from "react"
+import React, { HTMLInputTypeAttribute } from "react"
 import "./components.css"
 
 export const Input = ({
@@ -6,16 +6,18 @@ export const Input = ({
   value,
   onChange,
   placeholder,
+  type
 }: {
   label: string
-  value: string
-  onChange: (val: string) => void
-  placeholder?: string
+  value: any
+  onChange: (val: any) => void
+  placeholder?: string,
+  type?:HTMLInputTypeAttribute
 }) => (
   <label className="label">
     {label}
     <input
-      type="text"
+      type={type || "text"}
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}

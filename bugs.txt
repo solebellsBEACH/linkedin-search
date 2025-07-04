@@ -2,3 +2,4 @@
 - Tipo de vaga deve ser select 
 - remover regiao por enquanto 
 - add a funcionalidade de skip 
+- tecnologia tem q add um por um 

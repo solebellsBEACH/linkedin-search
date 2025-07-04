@@ -2,63 +2,21 @@ import React from "react"
 import { useForm, Controller } from "react-hook-form"
 import { Select } from "../components/select"
 import { Input } from "../components/input"
-import { redirectUrl } from "../shared/utils/chrome"
+import { DeveloperFormValues } from "../shared/types/developer"
+import { onSubmit } from "../shared/utils/query"
 
-const SENIORITY_MAP: Record<string, string[]> = {
-  Junior: ["Junior", "JR", "Entry"],
-  Pleno: ["Pleno", "Mid", "PL"],
-  Senior: ["Senior", "SR"],
-  Estágio: ["Estagiário", "Estágio", "Intern"],
-}
-
-type FormValues = {
-  tab: string
-  tech: string
-  seniority: string
-  tipoContrato: string
-  regiao: string
-}
 
 export function DevelopersTab() {
-  const { handleSubmit, control, watch } = useForm<FormValues>({
+  const { handleSubmit, control, watch } = useForm<DeveloperFormValues>({
     defaultValues: {
       tab: "jobs",
       tech: "React",
       seniority: "Junior",
       tipoContrato: "",
-      regiao: "",
+      skip:0
     },
   })
 
-  const buildQuery = (data: FormValues) => {
-    const techFormatted = data.tech.trim()
-    const regionFormatted = data.regiao.trim()
-    const contractFormatted = data.tipoContrato.trim()
-    const seniorities = SENIORITY_MAP[data.seniority] || [data.seniority]
-
-    const techQuery = techFormatted.toLowerCase().includes("front")
-      ? `("Frontend" OR "Front")`
-      : `("${techFormatted}")`
-
-    const seniorityQuery = `(${seniorities.map(s => `"${s}"`).join(" OR ")})`
-    const contractQuery = contractFormatted ? `("${contractFormatted}")` : ""
-    const regionQuery = regionFormatted ? `("${regionFormatted}")` : ""
-
-    const terms = [techQuery, seniorityQuery, contractQuery, regionQuery].filter(Boolean)
-    return terms.join(" AND ")
-  }
-
-  const onSubmit = (data: FormValues) => {
-    const query = buildQuery(data)
-    const encoded = encodeURIComponent(query)
-
-    const url =
-      data.tab === "jobs"
-        ? `https://www.linkedin.com/jobs/search/?keywords=${encoded}&origin=JOBS_HOME_SEARCH_BUTTON`
-        : `https://www.linkedin.com/search/results/content/?keywords=${encoded}&sortBy=DATE_POSTED`
-    console.log(url, data)
-    redirectUrl( url )
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -111,12 +69,13 @@ export function DevelopersTab() {
       />
 
       <Controller
-        name="regiao"
+        name="skip"
         control={control}
         render={({ field }) => (
           <Input
-            label="Região/Cidade:"
-            placeholder="Remoto, São Paulo, Europa..."
+            label="Skip"
+            placeholder="Página de Pesquisa"
+            type="number"
             {...field}
           />
         )}
@@ -128,3 +87,5 @@ export function DevelopersTab() {
     </form>
   )
 }
+
+
