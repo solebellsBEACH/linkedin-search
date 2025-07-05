@@ -1,25 +1,29 @@
-import React from "react"
+import React, { forwardRef, HTMLInputTypeAttribute } from "react"
 import "./components.css"
 
-export const Input = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
+type InputProps = {
   label: string
-  value: string
-  onChange: (val: string) => void
+  value?: any
+  onChange?: (val: any) => void
   placeholder?: string
-}) => (
-  <label className="label">
-    {label}
-    <input
-      type="text"
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="input"
-    />
-  </label>
+  type?: HTMLInputTypeAttribute
+} & React.InputHTMLAttributes<HTMLInputElement>
+
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ label, value, onChange, placeholder, type = "text", ...rest }, ref) => (
+    <label className="label">
+      {label}
+      <input
+        ref={ref}
+        type={type}
+        value={value}
+        onChange={e => onChange?.(e.target.value)}
+        placeholder={placeholder}
+        className="input"
+        {...rest}
+      />
+    </label>
+  )
 )
+
+Input.displayName = "Input"

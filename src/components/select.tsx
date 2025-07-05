@@ -1,25 +1,28 @@
-import React from "react"
+import React, { forwardRef } from "react"
 import "./components.css"
 
-export const Select = ({
-  label,
-  value,
-  onChange,
-  children,
-}: {
+type SelectProps = {
   label: string
-  value: string
-  onChange: (val: string) => void
+  value?: string
+  onChange?: (val: string) => void
   children: React.ReactNode
-}) => (
-  <label className="label">
-    {label}
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      className="input"
-    >
-      {children}
-    </select>
-  </label>
+} & React.SelectHTMLAttributes<HTMLSelectElement>
+
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+  ({ label, value, onChange, children, ...rest }, ref) => (
+    <label className="label">
+      {label}
+      <select
+        ref={ref}
+        value={value}
+        onChange={e => onChange?.(e.target.value)}
+        className="input"
+        {...rest}
+      >
+        {children}
+      </select>
+    </label>
+  )
 )
+
+Select.displayName = "Select"
