@@ -2,10 +2,10 @@ import { DeveloperFormValues } from "../types/developer"
 import { redirectUrl } from "./chrome"
 
 const SENIORITY_MAP: Record<string, string[]> = {
-  Junior: ["Junior", "JR", "Entry"],
-  Pleno: ["Pleno", "Mid", "PL"],
-  Senior: ["Senior", "SR"],
-  Estágio: ["Estagiário", "Estágio", "Intern"],
+  Junior: ["Junior", "JR", ],
+  Pleno: ["Pleno", "Mid",],
+  Senior: ["Senior"],
+  Estágio: ["Estagiário", "Intern"],
 }
 
 function getJobsUrl(data:DeveloperFormValues){

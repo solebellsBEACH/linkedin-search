@@ -6,17 +6,21 @@ import { Select } from "../select"
 import { Input } from "../input"
 
 export function TecnicalForm() {
-
   const { handleSubmit, control, watch } = useForm<DeveloperFormValues>({
     defaultValues: {
       tab: "jobs",
-      tech: "React",
-      seniority: "Junior",
-      tipoContrato: "",
-      skip:0
+      skip: 0,
+      seniority:"Estágio",
     },
   })
 
+  const values = watch()
+
+  const isFormFilled =
+    values.tab &&
+    values.tech?.trim() &&
+    values.seniority &&
+    values.skip !== undefined
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -81,11 +85,9 @@ export function TecnicalForm() {
         )}
       />
 
-      <button type="submit" className="button">
+      <button type="submit" className="button" disabled={!isFormFilled}>
         Buscar no LinkedIn
       </button>
     </form>
   )
 }
-
-
