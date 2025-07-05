@@ -1,4 +1,4 @@
-const isProd = false
+const isProd = true
 
 export function redirectUrl(url:string){
     if(isProd) chrome.tabs.create({ url })
