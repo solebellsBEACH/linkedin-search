@@ -1,38 +1,36 @@
 import { fieldLabels, formatInfos } from "./constants";
 
-const _url = "https://www.linkedin.com/jobs/search/?currentJobId=4265458806&distance=25&f_AL=true&f_E=4&geoId=106057199&keywords=angular&origin=JOBS_HOME_KEYWORD_HISTORY&refresh=true"
+const isDev = true;
 
-function _formatValues(params: Record<string, string>): Record<string, string> {
+const devUrl =
+  "https://www.linkedin.com/jobs/search/?currentJobId=4264222246&distance=25&f_AL=true&f_E=4&geoId=106057199&keywords=angular&origin=JOBS_HOME_KEYWORD_HISTORY&refresh=true&start=25";
+
+function formatValues(params: Record<string, string>): Record<string, string> {
   const formatted: Record<string, string> = {};
-
   for (const [key, value] of Object.entries(params)) {
     const label = fieldLabels[key] ?? key;
-    const readableValue = formatInfos[key]?.[value] ?? value;
-    formatted[label] = readableValue;
+    formatted[label] = formatInfos[key]?.[value] ?? value;
   }
-
   return formatted;
 }
 
-function _getLinkedInQueryParams(url: string): {
+function parseLinkedInQueryParams(url: string): {
   raw: Record<string, string>;
   formatted: Record<string, string>;
 } {
-  const parsedUrl = new URL(url);
   const raw: Record<string, string> = {};
-
-  parsedUrl.searchParams.forEach((value, key) => {
+  new URL(url).searchParams.forEach((value, key) => {
     raw[key] = value;
   });
-
   return {
     raw,
-    formatted: _formatValues(raw)
+    formatted: formatValues(raw),
   };
 }
 
+async function isOnLinkedInJobsTab(): Promise<boolean> {
+  if (isDev) return devUrl.includes("linkedin.com/jobs/search");
 
-export async function isOnLinkedInJobsTab(): Promise<boolean> {
   return new Promise((resolve) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0]?.url || "";
@@ -41,17 +39,19 @@ export async function isOnLinkedInJobsTab(): Promise<boolean> {
   });
 }
 
-export async function getQueryParams(): Promise<ReturnType<typeof _getLinkedInQueryParams>> {
-  return new Promise((resolve) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const url = tabs[0]?.url || "";
-      const result = _getLinkedInQueryParams(url);
-      resolve(result);
-    });
-  });
+async function getQueryParams(): Promise<ReturnType<typeof parseLinkedInQueryParams>> {
+  const url = isDev
+    ? devUrl
+    : await new Promise<string>((resolve) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          resolve(tabs[0]?.url || "");
+        });
+      });
+
+  return parseLinkedInQueryParams(url);
 }
 
 export const personalQuery = {
-    isOnLinkedInJobsTab,
-    getQueryParams
-}
+  isOnLinkedInJobsTab,
+  getQueryParams,
+};

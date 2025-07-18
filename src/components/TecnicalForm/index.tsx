@@ -14,7 +14,6 @@ export function TecnicalForm() {
     defaultValues: {
       tab: 'jobs',
       skip: 0,
-      seniority: 'Estágio',
     },
   });
 
@@ -29,20 +28,19 @@ export function TecnicalForm() {
 
 function handleUseCurrentQuery() {
   personalQuery.getQueryParams().then(({ raw, formatted }) => {
-    console.log(raw)
-    const {skip, start , pageNum,} = raw
-    // skip || start || pageNum
-
+    const { skip, start, pageNum } = raw;
     const keywords = raw.keywords || '';
-    const seniority = seniorityMap[raw['f_E']];
-
-    console.log(seniority)
+    const experienceLabel = formatted["Experience Level"];
+    const seniority = seniorityMap[experienceLabel || ''] || '';
 
     if (keywords) setValue('tech', keywords);
     if (seniority) setValue('seniority', seniority);
-    setValue('skip', parseInt(skip || start || pageNum || "0"));
+
+    const skipValue = parseInt(skip || start || pageNum || '0');
+    setValue('skip', isNaN(skipValue) ? 0 : skipValue);
   });
 }
+
 
   return (
 <form onSubmit={handleSubmit(onSubmit)}>

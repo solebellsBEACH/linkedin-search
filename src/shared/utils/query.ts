@@ -5,7 +5,7 @@ export const seniorityMap: Record<string, DeveloperFormValues["seniority"]> = {
   "Internship": "Estágio",
   "Entry level": "Junior",
   "Associate": "Pleno",
-  "Mid-Senior level": "Senior",
+  "Mid-Senior level (Sênior)": "Senior",
 };
 
 function getJobsUrl(data:DeveloperFormValues){
