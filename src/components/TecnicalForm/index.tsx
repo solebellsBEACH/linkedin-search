@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { DeveloperFormValues } from '../../shared/types/developer';
 import { onSubmit } from '../../shared/utils/query';
 import { Button, Stack } from '@mui/material';
 import { Select } from '../select';
 import { Input } from '../input';
+import { personalQuery } from '../../shared/personalQuery';
 
 export function TecnicalForm() {
+
+  const [isJobsTab, setIsJobsTab] = useState<boolean | null>(null);
+
   const { handleSubmit, control, watch } = useForm<DeveloperFormValues>({
     defaultValues: {
       tab: 'jobs',
@@ -14,6 +18,10 @@ export function TecnicalForm() {
       seniority: 'Estágio',
     },
   });
+
+  useEffect(() => {
+    personalQuery.isOnLinkedInJobsTab().then(setIsJobsTab)
+  }, []);
 
   const values = watch();
 
@@ -23,6 +31,12 @@ export function TecnicalForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2}>
+        {
+          isJobsTab && <Button
+          variant="contained" color="secondary">
+            Usar pesquisa atual
+        </Button>
+        }
         <Controller
           name="tab"
           control={control}

@@ -1,6 +1,7 @@
 {
     "version": "1.0.1",
     "manifest_version": 3,
+    "permissions": ["tabs", "activeTab"],
     "name": "LinkedIn Query Helper",
     "description": "Pesquise vagas ou publicações no LinkedIn com filtros de tecnologia, senioridade e região.",
     "action": {
