@@ -27,7 +27,7 @@ export default function App() {
           }}
         >
           <Typography variant="h6" className="title" sx={{ mb: 2 }}>
-            🔎 Busca no LinkedIn
+            🔎 LinkedIn Query Helper
           </Typography>
           <TecnicalForm />
         </Container>

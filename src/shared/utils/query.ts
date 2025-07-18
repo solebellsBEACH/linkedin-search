@@ -22,9 +22,19 @@ export const buildQuery = (data: DeveloperFormValues) => {
 }
 
 export const onSubmit = (data: DeveloperFormValues) => {
-    const url =
-      data.tab === "jobs"
-        ? getJobsUrl(data)
-        : getPostUrl(data)
-    redirectUrl( url || 'https://www.linkedin.com/jobs/search/' )
-}
+  const cleanedTech = data.exclude
+    ? data.tech
+        .split(' ')
+        .filter(term => !data.exclude.toLowerCase().split(',').includes(term.toLowerCase()))
+        .join(' ')
+    : data.tech;
+
+  const payload = { ...data, tech: cleanedTech };
+
+  const url =
+    payload.tab === 'jobs'
+      ? getJobsUrl(payload)
+      : getPostUrl(payload);
+
+  redirectUrl(url || 'https://www.linkedin.com/jobs/search/');
+};

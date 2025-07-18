@@ -2,27 +2,44 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { DeveloperFormValues } from '../../shared/types/developer';
 import { onSubmit, seniorityMap } from '../../shared/utils/query';
-import { Button, Stack } from '@mui/material';
+import { Button, Stack, Autocomplete, TextField } from '@mui/material';
 import { personalQuery } from '../../shared/personalQuery';
 
 const Select = lazy(() => import('../select').then(mod => ({ default: mod.Select })));
 const Input = lazy(() => import('../input').then(mod => ({ default: mod.Input })));
 
+const techSuggestions = ['React', 'Angular', 'Vue', 'QA', 'Frontend', 'Node.js'];
+
 export function TecnicalForm() {
   const [isJobsTab, setIsJobsTab] = useState<boolean | null>(null);
 
-  const { handleSubmit, control, watch, setValue } = useForm<DeveloperFormValues>({
+  const { handleSubmit, control, watch, setValue, reset } = useForm<DeveloperFormValues>({
     defaultValues: {
       tab: 'jobs',
       tech: '',
       seniority: 'Junior',
       skip: 0,
+      exclude: '',
     },
   });
 
   useEffect(() => {
     personalQuery.isOnLinkedInJobsTab().then(setIsJobsTab);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        handleSubmit(onSubmit)();
+      }
+      if (e.ctrlKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        handleClear();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSubmit]);
 
   const values = watch();
 
@@ -44,12 +61,27 @@ export function TecnicalForm() {
     });
   }
 
+  function handleClear() {
+    reset({
+      tab: 'jobs',
+      tech: '',
+      seniority: 'Junior',
+      skip: 0,
+      exclude: '',
+    });
+  }
+
   return (
     <Suspense fallback={<div>Carregando formulário...</div>}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
           {isJobsTab && (
-            <Button variant="contained" color="secondary" onClick={handleUseCurrentQuery}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleUseCurrentQuery}
+              sx={{ fontWeight: 600, borderRadius: 2, '&:hover': { bgcolor: 'secondary.dark' } }}
+            >
               Usar pesquisa atual
             </Button>
           )}
@@ -69,11 +101,14 @@ export function TecnicalForm() {
             name="tech"
             control={control}
             render={({ field }) => (
-              <Input
-                label="Tecnologia:"
-                placeholder="React, QA, Frontend..."
-                {...field}
-                value={field.value ?? ''}
+              <Autocomplete
+                freeSolo
+                options={techSuggestions}
+                inputValue={field.value ?? ''}
+                onInputChange={(_, newValue) => field.onChange(newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Tecnologia" placeholder="React, QA, Frontend..." />
+                )}
               />
             )}
           />
@@ -92,6 +127,19 @@ export function TecnicalForm() {
           />
 
           <Controller
+            name="exclude"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label="Excluir palavras-chave"
+                placeholder="Ex: estágio, júnior"
+                {...field}
+                value={field.value ?? ''}
+              />
+            )}
+          />
+
+          <Controller
             name="skip"
             control={control}
             render={({ field }) => (
@@ -105,15 +153,34 @@ export function TecnicalForm() {
             )}
           />
 
-          <Button
-            type="submit"
-            style={{ marginBottom: 10 }}
-            variant="contained"
-            color="primary"
-            disabled={!isFormFilled}
-          >
-            Buscar no LinkedIn
-          </Button>
+          <Stack direction="row" spacing={2} justifyContent="space-between">
+            <Button
+              onClick={handleClear}
+              variant="outlined"
+              color="secondary"
+              sx={{
+                flex: 1,
+                fontWeight: 500,
+                '&:hover': { bgcolor: 'secondary.light' },
+              }}
+            >
+              Limpar Filtros
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{
+                flex: 1,
+                fontWeight: 600,
+                borderRadius: 2,
+                '&:hover': { bgcolor: 'primary.dark' },
+              }}
+              disabled={!isFormFilled}
+            >
+              Buscar no LinkedIn
+            </Button>
+          </Stack>
         </Stack>
       </form>
     </Suspense>
