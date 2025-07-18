@@ -1,6 +1,6 @@
 import { fieldLabels, formatInfos } from "./constants";
 
-const isDev = true;
+const isDev = false;
 
 const devUrl =
   "https://www.linkedin.com/jobs/search/?currentJobId=4264222246&distance=25&f_AL=true&f_E=4&geoId=106057199&keywords=angular&origin=JOBS_HOME_KEYWORD_HISTORY&refresh=true&start=25";
