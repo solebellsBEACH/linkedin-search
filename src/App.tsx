@@ -1,37 +1,37 @@
-import { useState } from "react";
-import { DevelopersTab } from "./tabs/developers";
-import { QaTab } from "./tabs/qa-tab";
-import { DesignTab } from "./tabs/design-tab";
-import './App.css'
+import { ThemeProvider, CssBaseline, Container, Box, Typography, Button } from '@mui/material';
+import { TecnicalForm } from './components/TecnicalForm';
+import theme from './theme/theme';
 
-export default function Popup() {
-  const [activeTab, setActiveTab] = useState("developers");
-
-  const renderTab = () => {
-    switch (activeTab) {
-      case "developers":
-        return <DevelopersTab />;
-      case "qa":
-        return <QaTab />;
-      case "design":
-        return <DesignTab />;
-      default:
-        return <DevelopersTab />;
-    }
-  };
-
+export default function App() {
   return (
-    <div className="container">
-      <h3 className="title">🔎 Busca no LinkedIn</h3>
-      <nav>
-        <button onClick={() => setActiveTab("developers")} className={activeTab === "developers" ? "active" : ""}>Desenvolvedores</button>
-        <button onClick={() => setActiveTab("qa")} className={activeTab === "qa" ? "active" : ""}>QA</button>
-        <button onClick={() => setActiveTab("design")} className={activeTab === "design" ? "active" : ""}>Design</button>
-      </nav>
-
-      <section>
-        {renderTab()}
-      </section>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          bgcolor: 'background.default',
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'start',
+        }}
+      >
+        <Container
+          maxWidth="xs"
+          sx={{
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            padding: '10px 30px',
+            fontFamily: 'Arial, sans-serif',
+            width: 350,
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="h6" className="title" sx={{ mb: 2 }}>
+            🔎 LinkedIn Query Helper
+          </Typography>
+          <TecnicalForm />
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 }
