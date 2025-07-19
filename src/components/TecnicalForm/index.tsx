@@ -2,7 +2,7 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { DeveloperFormValues } from '../../shared/types/developer';
 import { onSubmit, seniorityMap } from '../../shared/utils/query';
-import { Button, Stack, Autocomplete, TextField } from '@mui/material';
+import { Button, Stack, Autocomplete, TextField, Divider } from '@mui/material';
 import { personalQuery } from '../../shared/personalQuery';
 
 const Select = lazy(() => import('../select').then(mod => ({ default: mod.Select })));
@@ -23,6 +23,8 @@ export function TecnicalForm() {
     },
   });
 
+  const values = watch();
+
   useEffect(() => {
     personalQuery.isOnLinkedInJobsTab().then(setIsJobsTab);
   }, []);
@@ -41,10 +43,8 @@ export function TecnicalForm() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSubmit]);
 
-  const values = watch();
-
   const isFormFilled =
-    values.tab && values.tech?.trim() && values.seniority && values.skip !== undefined;
+    values.tab && values.tech?.trim() && values.skip !== undefined;
 
   function handleUseCurrentQuery() {
     personalQuery.getQueryParams().then(({ raw, formatted }) => {
@@ -54,16 +54,16 @@ export function TecnicalForm() {
       const seniority = seniorityMap[experienceLabel || ''] || '';
 
       if (keywords) setValue('tech', keywords);
-      if (seniority) setValue('seniority', seniority);
+      if (values.tab === 'jobs' && seniority) setValue('seniority', seniority);
 
       const skipValue = parseInt(skip || start || pageNum || '0', 10);
-      setValue('skip', isNaN(skipValue) ? 0 : skipValue);
+      if (values.tab === 'jobs') setValue('skip', isNaN(skipValue) ? 0 : skipValue);
     });
   }
 
   function handleClear() {
     reset({
-      tab: 'jobs',
+      tab: values.tab,
       tech: '',
       seniority: 'Junior',
       skip: 0,
@@ -90,7 +90,7 @@ export function TecnicalForm() {
             name="tab"
             control={control}
             render={({ field }) => (
-              <Select label="Aba:" {...field} value={field.value ?? 'jobs'}>
+              <Select label="Buscar em:" {...field} value={field.value ?? 'jobs'}>
                 <option value="jobs">Vagas</option>
                 <option value="content">Publicações</option>
               </Select>
@@ -114,19 +114,6 @@ export function TecnicalForm() {
           />
 
           <Controller
-            name="seniority"
-            control={control}
-            render={({ field }) => (
-              <Select label="Senioridade:" {...field} value={field.value ?? 'Junior'}>
-                <option value="Estágio">Estágio</option>
-                <option value="Junior">Junior</option>
-                <option value="Pleno">Pleno</option>
-                <option value="Senior">Senior</option>
-              </Select>
-            )}
-          />
-
-          <Controller
             name="exclude"
             control={control}
             render={({ field }) => (
@@ -139,21 +126,44 @@ export function TecnicalForm() {
             )}
           />
 
-          <Controller
-            name="skip"
-            control={control}
-            render={({ field }) => (
-              <Input
-                label="Página de Pesquisa"
-                placeholder="0"
-                type="number"
-                {...field}
-                value={field.value ?? 0}
+          {values.tab === 'jobs' && (
+            <>
+              <Controller
+                name="seniority"
+                control={control}
+                render={({ field }) => (
+                  <Select label="Senioridade:" {...field} value={field.value ?? 'Junior'}>
+                    <option value="Estágio">Estágio</option>
+                    <option value="Junior">Junior</option>
+                    <option value="Pleno">Pleno</option>
+                    <option value="Senior">Senior</option>
+                  </Select>
+                )}
               />
-            )}
-          />
 
-          <Stack direction="row" spacing={2} justifyContent="space-between">
+              <Controller
+                name="skip"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    label="Página de Pesquisa"
+                    placeholder="0"
+                    type="number"
+                    {...field}
+                    value={field.value ?? 0}
+                  />
+                )}
+              />
+            </>
+          )}
+
+          {values.tab === 'content' && (
+            <Divider textAlign="center" sx={{ mt: 2, mb: 1 }}>
+              Configuração para Publicações
+            </Divider>
+          )}
+
+          <Stack direction="row" spacing={2} justifyContent="space-between" mt={1}>
             <Button
               onClick={handleClear}
               variant="outlined"
