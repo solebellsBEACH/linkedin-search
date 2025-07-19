@@ -1,93 +1,198 @@
-import React from "react"
-import { useForm, Controller } from "react-hook-form"
-import { DeveloperFormValues } from "../../shared/types/developer"
-import { onSubmit } from "../../shared/utils/query"
-import { Select } from "../select"
-import { Input } from "../input"
+import React, { useEffect, useState, lazy, Suspense } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { DeveloperFormValues } from '../../shared/types/developer';
+import { onSubmit, seniorityMap } from '../../shared/utils/query';
+import { Button, Stack, Autocomplete, TextField, Divider } from '@mui/material';
+import { personalQuery } from '../../shared/personalQuery';
+
+const Select = lazy(() => import('../select').then(mod => ({ default: mod.Select })));
+const Input = lazy(() => import('../input').then(mod => ({ default: mod.Input })));
+
+const techSuggestions = ['React', 'Angular', 'Vue', 'QA', 'Frontend', 'Node.js'];
 
 export function TecnicalForm() {
-  const { handleSubmit, control, watch } = useForm<DeveloperFormValues>({
-    defaultValues: {
-      tab: "jobs",
-      skip: 0,
-      seniority:"Estágio",
-    },
-  })
+  const [isJobsTab, setIsJobsTab] = useState<boolean | null>(null);
 
-  const values = watch()
+  const { handleSubmit, control, watch, setValue, reset } = useForm<DeveloperFormValues>({
+    defaultValues: {
+      tab: 'jobs',
+      tech: '',
+      seniority: 'Junior',
+      skip: 0,
+      exclude: '',
+    },
+  });
+
+  const values = watch();
+
+  useEffect(() => {
+    personalQuery.isOnLinkedInJobsTab().then(setIsJobsTab);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        handleSubmit(onSubmit)();
+      }
+      if (e.ctrlKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        handleClear();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSubmit]);
 
   const isFormFilled =
-    values.tab &&
-    values.tech?.trim() &&
-    values.seniority &&
-    values.skip !== undefined
+    values.tab && values.tech?.trim() && values.skip !== undefined;
+
+  function handleUseCurrentQuery() {
+    personalQuery.getQueryParams().then(({ raw, formatted }) => {
+      const { skip, start, pageNum } = raw;
+      const keywords = raw.keywords || '';
+      const experienceLabel = formatted['Experience Level'];
+      const seniority = seniorityMap[experienceLabel || ''] || '';
+
+      if (keywords) setValue('tech', keywords);
+      if (values.tab === 'jobs' && seniority) setValue('seniority', seniority);
+
+      const skipValue = parseInt(skip || start || pageNum || '0', 10);
+      if (values.tab === 'jobs') setValue('skip', isNaN(skipValue) ? 0 : skipValue);
+    });
+  }
+
+  function handleClear() {
+    reset({
+      tab: values.tab,
+      tech: '',
+      seniority: 'Junior',
+      skip: 0,
+      exclude: '',
+    });
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <Controller
-        name="tab"
-        control={control}
-        render={({ field }) => (
-          <Select label="Aba:" {...field}>
-            <option value="jobs">Vagas</option>
-            <option value="content">Publicações</option>
-          </Select>
-        )}
-      />
+    <Suspense fallback={<div>Carregando formulário...</div>}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Stack spacing={2}>
+          {isJobsTab && (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleUseCurrentQuery}
+              sx={{ fontWeight: 600, borderRadius: 2, '&:hover': { bgcolor: 'secondary.dark' } }}
+            >
+              Usar pesquisa atual
+            </Button>
+          )}
 
-      <Controller
-        name="tech"
-        control={control}
-        render={({ field }) => (
-          <Input
-            label="Tecnologia:"
-            placeholder="React, QA, Frontend..."
-            {...field}
+          <Controller
+            name="tab"
+            control={control}
+            render={({ field }) => (
+              <Select label="Buscar em:" {...field} value={field.value ?? 'jobs'}>
+                <option value="jobs">Vagas</option>
+                <option value="content">Publicações</option>
+              </Select>
+            )}
           />
-        )}
-      />
 
-      <Controller
-        name="seniority"
-        control={control}
-        render={({ field }) => (
-          <Select label="Senioridade:" {...field}>
-            <option value="Estágio">Estágio</option>
-            <option value="Junior">Junior</option>
-            <option value="Pleno">Pleno</option>
-            <option value="Senior">Senior</option>
-          </Select>
-        )}
-      />
-
-      <Controller
-        name="tipoContrato"
-        control={control}
-        render={({ field }) => (
-          <Input
-            label="Tipo de vaga:"
-            placeholder="CLT, PJ, Estágio, Freela..."
-            {...field}
+          <Controller
+            name="tech"
+            control={control}
+            render={({ field }) => (
+              <Autocomplete
+                freeSolo
+                options={techSuggestions}
+                inputValue={field.value ?? ''}
+                onInputChange={(_, newValue) => field.onChange(newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Tecnologia" placeholder="React, QA, Frontend..." />
+                )}
+              />
+            )}
           />
-        )}
-      />
 
-      <Controller
-        name="skip"
-        control={control}
-        render={({ field }) => (
-          <Input
-            label="Skip"
-            placeholder="Página de Pesquisa"
-            type="number"
-            {...field}
+          <Controller
+            name="exclude"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label="Excluir palavras-chave"
+                placeholder="Ex: estágio, júnior"
+                {...field}
+                value={field.value ?? ''}
+              />
+            )}
           />
-        )}
-      />
 
-      <button type="submit" className="button" disabled={!isFormFilled}>
-        Buscar no LinkedIn
-      </button>
-    </form>
-  )
+          {values.tab === 'jobs' && (
+            <>
+              <Controller
+                name="seniority"
+                control={control}
+                render={({ field }) => (
+                  <Select label="Senioridade:" {...field} value={field.value ?? 'Junior'}>
+                    <option value="Estágio">Estágio</option>
+                    <option value="Junior">Junior</option>
+                    <option value="Pleno">Pleno</option>
+                    <option value="Senior">Senior</option>
+                  </Select>
+                )}
+              />
+
+              <Controller
+                name="skip"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    label="Página de Pesquisa"
+                    placeholder="0"
+                    type="number"
+                    {...field}
+                    value={field.value ?? 0}
+                  />
+                )}
+              />
+            </>
+          )}
+
+          {values.tab === 'content' && (
+            <Divider textAlign="center" sx={{ mt: 2, mb: 1 }}>
+              Configuração para Publicações
+            </Divider>
+          )}
+
+          <Stack direction="row" spacing={2} justifyContent="space-between" mt={1}>
+            <Button
+              onClick={handleClear}
+              variant="outlined"
+              color="secondary"
+              sx={{
+                flex: 1,
+                fontWeight: 500,
+                '&:hover': { bgcolor: 'secondary.light' },
+              }}
+            >
+              Limpar Filtros
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{
+                flex: 1,
+                fontWeight: 600,
+                borderRadius: 2,
+                '&:hover': { bgcolor: 'primary.dark' },
+              }}
+              disabled={!isFormFilled}
+            >
+              Buscar no LinkedIn
+            </Button>
+          </Stack>
+        </Stack>
+      </form>
+    </Suspense>
+  );
 }

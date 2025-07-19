@@ -1,7 +1,7 @@
 export type DeveloperFormValues = {
-  tab: string
-  tech: string
-  seniority: string
-  tipoContrato: string
-  skip:number
-}
+  tab: 'jobs' | 'content';
+  tech: string;
+  seniority: 'Estágio' | 'Junior' | 'Pleno' | 'Senior';
+  skip: number;
+  exclude: string;
+};
