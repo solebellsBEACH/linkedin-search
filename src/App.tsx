@@ -1,11 +1,33 @@
 import React from 'react';
-import { ThemeProvider, CssBaseline, Box, IconButton, Tooltip } from '@mui/material';
+import { 
+  ThemeProvider, 
+  CssBaseline, 
+  Box, 
+  IconButton, 
+  Tooltip,
+  tooltipClasses,
+  styled
+} from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { TecnicalForm } from './components/TecnicalForm';
 import { lightTheme, darkTheme } from './theme';
 import { useTheme } from './shared/hooks/useTheme';
 import './App.css';
+
+// Estilizar o tooltip para melhor visibilidade
+const StyledTooltip = styled(({ className, ...props }) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.mode === 'dark' ? '#fff' : '#333',
+    color: theme.palette.mode === 'dark' ? '#333' : '#fff',
+    fontSize: 12,
+    padding: '6px 12px',
+    borderRadius: 4,
+    fontWeight: 500,
+  },
+}));
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -26,7 +48,11 @@ function App() {
           }
         }}
       >
-        <Tooltip title={isDarkMode ? 'Mudar para tema claro' : 'Mudar para tema escuro'}>
+        <StyledTooltip 
+          title={isDarkMode ? "Mudar para tema claro" : "Mudar para tema escuro"}
+          placement="left"
+          arrow
+        >
           <IconButton
             onClick={toggleTheme}
             sx={{
@@ -49,7 +75,7 @@ function App() {
               <Brightness4Icon fontSize="small" />
             )}
           </IconButton>
-        </Tooltip>
+        </StyledTooltip>
         <Box sx={{ mt: 3 }}>
           <TecnicalForm />
         </Box>
