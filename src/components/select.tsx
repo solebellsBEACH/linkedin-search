@@ -1,49 +1,52 @@
-// src/components/Select.tsx
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select as MUISelect,
-  SelectChangeEvent,
-} from '@mui/material';
-import React, { forwardRef } from 'react';
+import React from 'react';
+import { Autocomplete, TextField } from '@mui/material';
 
-type SelectProps = {
+interface SelectProps {
   label: string;
-  value?: string;
-  onChange?: (val: string) => void;
+  value: string;
+  onChange: (value: string) => void;
   children: React.ReactNode;
-};
+}
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, value = '', onChange, children }, ref) => (
-    <FormControl fullWidth size="small">
-      <InputLabel>{label}</InputLabel>
-      <MUISelect
-        inputRef={ref}
-        value={value}
-        label={label}
-        onChange={(e: SelectChangeEvent<string>) => {
-          if (onChange) onChange(e.target.value);
-        }}
-      >
-        {/* Transformar <option> em <MenuItem> */}
-        {React.Children.map(children, child => {
-          if (
-            React.isValidElement(child) &&
-            typeof child.props.value === 'string'
-          ) {
-            return (
-              <MenuItem value={child.props.value}>
-                {child.props.children}
-              </MenuItem>
-            );
+export function Select({ label, value, onChange, children }: SelectProps) {
+  // Converter options de children
+  const options = React.Children.map(children, (child) => {
+    if (React.isValidElement(child) && child.type === 'option') {
+      return {
+        label: child.props.children,
+        value: child.props.value
+      };
+    }
+    return null;
+  }).filter(Boolean);
+
+  return (
+    <Autocomplete
+      value={options.find(option => option.value === value) || null}
+      onChange={(_, newValue) => {
+        onChange(newValue?.value || '');
+      }}
+      options={options}
+      getOptionLabel={(option) => option.label}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          size="small"
+          fullWidth
+        />
+      )}
+      disableClearable
+      ListboxProps={{
+        style: { maxHeight: '200px' }
+      }}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          '&:hover fieldset': {
+            borderColor: 'primary.main',
           }
-          return null;
-        })}
-      </MUISelect>
-    </FormControl>
-  )
-);
-
-Select.displayName = 'Select';
+        }
+      }}
+    />
+  );
+}

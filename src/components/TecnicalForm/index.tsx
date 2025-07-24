@@ -2,13 +2,31 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { DeveloperFormValues } from '../../shared/types/developer';
 import { onSubmit, seniorityMap } from '../../shared/utils/query';
-import { Button, Stack, Autocomplete, TextField, Divider } from '@mui/material';
+import { 
+  Button, 
+  Stack, 
+  Autocomplete, 
+  TextField, 
+  Divider,
+  Box,
+  CircularProgress
+} from '@mui/material';
 import { personalQuery } from '../../shared/personalQuery';
 
 const Select = lazy(() => import('../select').then(mod => ({ default: mod.Select })));
 const Input = lazy(() => import('../input').then(mod => ({ default: mod.Input })));
 
 const techSuggestions = ['React', 'Angular', 'Vue', 'QA', 'Frontend', 'Node.js'];
+const tabOptions = [
+  { label: 'Vagas', value: 'jobs' },
+  { label: 'Publicações', value: 'content' }
+];
+const seniorityOptions = [
+  { label: 'Estágio', value: 'Estágio' },
+  { label: 'Junior', value: 'Junior' },
+  { label: 'Pleno', value: 'Pleno' },
+  { label: 'Senior', value: 'Senior' }
+];
 
 export function TecnicalForm() {
   const [isJobsTab, setIsJobsTab] = useState<boolean | null>(null);
@@ -43,8 +61,7 @@ export function TecnicalForm() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSubmit]);
 
-  const isFormFilled =
-    values.tab && values.tech?.trim() && values.skip !== undefined;
+  const isFormFilled = values.tab && values.tech?.trim() && values.skip !== undefined;
 
   function handleUseCurrentQuery() {
     personalQuery.getQueryParams().then(({ raw, formatted }) => {
@@ -71,16 +88,34 @@ export function TecnicalForm() {
     });
   }
 
+  const autocompleteStyles = {
+    '& .MuiOutlinedInput-root': {
+      '&:hover fieldset': {
+        borderColor: 'primary.main',
+      }
+    }
+  };
+
   return (
-    <Suspense fallback={<div>Carregando formulário...</div>}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Stack spacing={2}>
+    <Suspense fallback={
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+        <CircularProgress size={24} />
+      </Box>
+    }>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%' }}>
+        <Stack spacing={1.5} sx={{ width: '100%' }}>
           {isJobsTab && (
             <Button
               variant="contained"
               color="secondary"
               onClick={handleUseCurrentQuery}
-              sx={{ fontWeight: 600, borderRadius: 2, '&:hover': { bgcolor: 'secondary.dark' } }}
+              size="small"
+              fullWidth
+              sx={{
+                fontSize: '0.8rem',
+                py: 1,
+                mb: 0.5
+              }}
             >
               Usar pesquisa atual
             </Button>
@@ -90,10 +125,24 @@ export function TecnicalForm() {
             name="tab"
             control={control}
             render={({ field }) => (
-              <Select label="Buscar em:" {...field} value={field.value ?? 'jobs'}>
-                <option value="jobs">Vagas</option>
-                <option value="content">Publicações</option>
-              </Select>
+              <Autocomplete
+                value={tabOptions.find(option => option.value === field.value) || null}
+                onChange={(_, newValue) => field.onChange(newValue?.value || 'jobs')}
+                options={tabOptions}
+                getOptionLabel={(option) => option.label}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Buscar em"
+                    size="small"
+                  />
+                )}
+                disableClearable
+                ListboxProps={{
+                  style: { maxHeight: '200px' }
+                }}
+                sx={autocompleteStyles}
+              />
             )}
           />
 
@@ -107,8 +156,17 @@ export function TecnicalForm() {
                 inputValue={field.value ?? ''}
                 onInputChange={(_, newValue) => field.onChange(newValue)}
                 renderInput={(params) => (
-                  <TextField {...params} label="Tecnologia" placeholder="React, QA, Frontend..." />
+                  <TextField 
+                    {...params} 
+                    label="Tecnologia"
+                    placeholder="React, QA, Frontend..."
+                    size="small"
+                  />
                 )}
+                ListboxProps={{
+                  style: { maxHeight: '200px' }
+                }}
+                sx={autocompleteStyles}
               />
             )}
           />
@@ -117,11 +175,23 @@ export function TecnicalForm() {
             name="exclude"
             control={control}
             render={({ field }) => (
-              <Input
-                label="Excluir palavras-chave"
-                placeholder="Ex: estágio, júnior"
-                {...field}
-                value={field.value ?? ''}
+              <Autocomplete
+                freeSolo
+                options={[]}
+                inputValue={field.value ?? ''}
+                onInputChange={(_, newValue) => field.onChange(newValue)}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="Excluir palavras-chave"
+                    placeholder="Ex: estágio, júnior"
+                    size="small"
+                  />
+                )}
+                ListboxProps={{
+                  style: { maxHeight: '200px' }
+                }}
+                sx={autocompleteStyles}
               />
             )}
           />
@@ -132,12 +202,24 @@ export function TecnicalForm() {
                 name="seniority"
                 control={control}
                 render={({ field }) => (
-                  <Select label="Senioridade:" {...field} value={field.value ?? 'Junior'}>
-                    <option value="Estágio">Estágio</option>
-                    <option value="Junior">Junior</option>
-                    <option value="Pleno">Pleno</option>
-                    <option value="Senior">Senior</option>
-                  </Select>
+                  <Autocomplete
+                    value={seniorityOptions.find(option => option.value === field.value) || null}
+                    onChange={(_, newValue) => field.onChange(newValue?.value || 'Junior')}
+                    options={seniorityOptions}
+                    getOptionLabel={(option) => option.label}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Senioridade"
+                        size="small"
+                      />
+                    )}
+                    disableClearable
+                    ListboxProps={{
+                      style: { maxHeight: '200px' }
+                    }}
+                    sx={autocompleteStyles}
+                  />
                 )}
               />
 
@@ -145,12 +227,15 @@ export function TecnicalForm() {
                 name="skip"
                 control={control}
                 render={({ field }) => (
-                  <Input
-                    label="Página de Pesquisa"
+                  <TextField
+                    label="Página"
                     placeholder="0"
                     type="number"
+                    size="small"
+                    fullWidth
                     {...field}
                     value={field.value ?? 0}
+                    sx={autocompleteStyles}
                   />
                 )}
               />
@@ -158,37 +243,30 @@ export function TecnicalForm() {
           )}
 
           {values.tab === 'content' && (
-            <Divider textAlign="center" sx={{ mt: 2, mb: 1 }}>
-              Configuração para Publicações
-            </Divider>
+            <Divider sx={{ my: 0.5 }}>Publicações</Divider>
           )}
 
-          <Stack direction="row" spacing={2} justifyContent="space-between" mt={1}>
+          <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
             <Button
               onClick={handleClear}
               variant="outlined"
               color="secondary"
-              sx={{
-                flex: 1,
-                fontWeight: 500,
-                '&:hover': { bgcolor: 'secondary.light' },
-              }}
+              size="small"
+              fullWidth
+              sx={{ fontSize: '0.8rem', py: 1 }}
             >
-              Limpar Filtros
+              Limpar
             </Button>
             <Button
               type="submit"
               variant="contained"
               color="primary"
-              sx={{
-                flex: 1,
-                fontWeight: 600,
-                borderRadius: 2,
-                '&:hover': { bgcolor: 'primary.dark' },
-              }}
+              size="small"
+              fullWidth
+              sx={{ fontSize: '0.8rem', py: 1 }}
               disabled={!isFormFilled}
             >
-              Buscar no LinkedIn
+              Buscar
             </Button>
           </Stack>
         </Stack>
