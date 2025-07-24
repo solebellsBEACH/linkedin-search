@@ -13,7 +13,8 @@ import {
   InputLabel,
   Divider,
   Box,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from '@mui/material';
 import { personalQuery } from '../../shared/personalQuery';
 
@@ -36,8 +37,22 @@ interface Option {
   value: string;
 }
 
+const KEYBOARD_SHORTCUTS = {
+  submit: '⌃ Enter',
+  clear: '⌃ L',
+  nextField: 'Tab',
+  previousField: '⇧ Tab',
+  useCurrentQuery: '⌃ U',
+  focusTech: '⌃ T',
+  focusSeniority: '⌃ S',
+  focusPage: '⌃ P'
+} as const;
+
 export function TecnicalForm() {
   const [isJobsTab, setIsJobsTab] = useState<boolean | undefined>(undefined);
+  const techRef = React.useRef<HTMLInputElement>(null);
+  const seniorityRef = React.useRef<HTMLInputElement>(null);
+  const pageRef = React.useRef<HTMLInputElement>(null);
 
   const { handleSubmit, control, watch, setValue, reset } = useForm<DeveloperFormValues>({
     defaultValues: {
@@ -57,17 +72,47 @@ export function TecnicalForm() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'Enter') {
-        handleSubmit(onSubmit)();
+      // Ignora atalhos quando estiver em campos de input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        if (e.ctrlKey && e.key === 'Enter') {
+          handleSubmit(onSubmit)();
+        }
+        return;
       }
-      if (e.ctrlKey && e.key.toLowerCase() === 'l') {
-        e.preventDefault();
-        handleClear();
+
+      if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case 'enter':
+            e.preventDefault();
+            handleSubmit(onSubmit)();
+            break;
+          case 'l':
+            e.preventDefault();
+            handleClear();
+            break;
+          case 'u':
+            e.preventDefault();
+            if (isJobsTab) handleUseCurrentQuery();
+            break;
+          case 't':
+            e.preventDefault();
+            techRef.current?.focus();
+            break;
+          case 's':
+            e.preventDefault();
+            seniorityRef.current?.focus();
+            break;
+          case 'p':
+            e.preventDefault();
+            pageRef.current?.focus();
+            break;
+        }
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSubmit]);
+  }, [handleSubmit, isJobsTab]);
 
   const isFormFilled = values.tab && values.tech?.trim() && values.skip !== undefined;
 
@@ -94,6 +139,7 @@ export function TecnicalForm() {
       skip: 0,
       exclude: '',
     });
+    techRef.current?.focus();
   }
 
   const autocompleteStyles = {
@@ -113,20 +159,22 @@ export function TecnicalForm() {
       <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%' }}>
         <Stack spacing={1.5} sx={{ width: '100%' }}>
           {isJobsTab && (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleUseCurrentQuery}
-              size="small"
-              fullWidth
-              sx={{
-                fontSize: '0.8rem',
-                py: 1,
-                mb: 0.5
-              }}
-            >
-              Usar pesquisa atual
-            </Button>
+            <Tooltip title={`Atalho: ${KEYBOARD_SHORTCUTS.useCurrentQuery}`} placement="top">
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleUseCurrentQuery}
+                size="small"
+                fullWidth
+                sx={{
+                  fontSize: '0.8rem',
+                  py: 1,
+                  mb: 0.5
+                }}
+              >
+                Usar pesquisa atual
+              </Button>
+            </Tooltip>
           )}
 
           <Controller
@@ -157,24 +205,27 @@ export function TecnicalForm() {
             name="tech"
             control={control}
             render={({ field }) => (
-              <Autocomplete
-                freeSolo
-                options={techSuggestions}
-                inputValue={field.value ?? ''}
-                onInputChange={(_, newValue) => field.onChange(newValue)}
-                renderInput={(params) => (
-                  <TextField 
-                    {...params} 
-                    label="Tecnologia"
-                    placeholder="React, QA, Frontend..."
-                    size="small"
-                  />
-                )}
-                ListboxProps={{
-                  style: { maxHeight: '200px' }
-                }}
-                sx={autocompleteStyles}
-              />
+              <Tooltip title={`Foco: ${KEYBOARD_SHORTCUTS.focusTech}`} placement="top">
+                <Autocomplete
+                  freeSolo
+                  options={techSuggestions}
+                  inputValue={field.value ?? ''}
+                  onInputChange={(_, newValue) => field.onChange(newValue)}
+                  renderInput={(params) => (
+                    <TextField 
+                      {...params} 
+                      inputRef={techRef}
+                      label="Tecnologia"
+                      placeholder="React, QA, Frontend..."
+                      size="small"
+                    />
+                  )}
+                  ListboxProps={{
+                    style: { maxHeight: '200px' }
+                  }}
+                  sx={autocompleteStyles}
+                />
+              </Tooltip>
             )}
           />
 
@@ -209,19 +260,22 @@ export function TecnicalForm() {
                 name="seniority"
                 control={control}
                 render={({ field }) => (
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Senioridade</InputLabel>
-                    <Select
-                      {...field}
-                      label="Senioridade"
-                    >
-                      {seniorityOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <Tooltip title={`Foco: ${KEYBOARD_SHORTCUTS.focusSeniority}`} placement="top">
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Senioridade</InputLabel>
+                      <Select
+                        {...field}
+                        label="Senioridade"
+                        inputRef={seniorityRef}
+                      >
+                        {seniorityOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Tooltip>
                 )}
               />
 
@@ -229,16 +283,19 @@ export function TecnicalForm() {
                 name="skip"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    label="Página"
-                    placeholder="0"
-                    type="number"
-                    size="small"
-                    fullWidth
-                    {...field}
-                    value={field.value ?? 0}
-                    sx={autocompleteStyles}
-                  />
+                  <Tooltip title={`Foco: ${KEYBOARD_SHORTCUTS.focusPage}`} placement="top">
+                    <TextField
+                      label="Página"
+                      placeholder="0"
+                      type="number"
+                      size="small"
+                      fullWidth
+                      inputRef={pageRef}
+                      {...field}
+                      value={field.value ?? 0}
+                      sx={autocompleteStyles}
+                    />
+                  </Tooltip>
                 )}
               />
             </>
@@ -249,27 +306,33 @@ export function TecnicalForm() {
           )}
 
           <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-            <Button
-              onClick={handleClear}
-              variant="outlined"
-              color="secondary"
-              size="small"
-              fullWidth
-              sx={{ fontSize: '0.8rem', py: 1 }}
-            >
-              Limpar
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              size="small"
-              fullWidth
-              sx={{ fontSize: '0.8rem', py: 1 }}
-              disabled={!isFormFilled}
-            >
-              Buscar
-            </Button>
+            <Tooltip title={`Atalho: ${KEYBOARD_SHORTCUTS.clear}`} placement="top">
+              <Button
+                onClick={handleClear}
+                variant="outlined"
+                color="secondary"
+                size="small"
+                fullWidth
+                sx={{ fontSize: '0.8rem', py: 1 }}
+              >
+                Limpar
+              </Button>
+            </Tooltip>
+            <Tooltip title={`Atalho: ${KEYBOARD_SHORTCUTS.submit}`} placement="top">
+              <span style={{ width: '100%' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  fullWidth
+                  sx={{ fontSize: '0.8rem', py: 1 }}
+                  disabled={!isFormFilled}
+                >
+                  Buscar
+                </Button>
+              </span>
+            </Tooltip>
           </Stack>
         </Stack>
       </form>
