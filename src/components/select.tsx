@@ -8,21 +8,23 @@ interface SelectProps {
   children: React.ReactNode;
 }
 
+interface Option {
+  label: string;
+  value: string;
+}
+
 export function Select({ label, value, onChange, children }: SelectProps) {
   // Converter options de children
-  const options = React.Children.map(children, (child) => {
-    if (React.isValidElement(child) && child.type === 'option') {
-      return {
-        label: child.props.children,
-        value: child.props.value
-      };
-    }
-    return null;
-  }).filter(Boolean);
+  const options = React.Children.toArray(children)
+    .filter((child): child is React.ReactElement => React.isValidElement(child) && child.type === 'option')
+    .map(child => ({
+      label: child.props.children,
+      value: child.props.value
+    }));
 
   return (
-    <Autocomplete
-      value={options.find(option => option.value === value) || null}
+    <Autocomplete<Option>
+      value={options.find(option => option.value === value) || undefined}
       onChange={(_, newValue) => {
         onChange(newValue?.value || '');
       }}
@@ -36,7 +38,6 @@ export function Select({ label, value, onChange, children }: SelectProps) {
           fullWidth
         />
       )}
-      disableClearable
       ListboxProps={{
         style: { maxHeight: '200px' }
       }}

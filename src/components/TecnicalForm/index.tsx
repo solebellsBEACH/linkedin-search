@@ -6,14 +6,17 @@ import {
   Button, 
   Stack, 
   Autocomplete, 
-  TextField, 
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
   Divider,
   Box,
   CircularProgress
 } from '@mui/material';
 import { personalQuery } from '../../shared/personalQuery';
 
-const Select = lazy(() => import('../select').then(mod => ({ default: mod.Select })));
 const Input = lazy(() => import('../input').then(mod => ({ default: mod.Input })));
 
 const techSuggestions = ['React', 'Angular', 'Vue', 'QA', 'Frontend', 'Node.js'];
@@ -28,8 +31,13 @@ const seniorityOptions = [
   { label: 'Senior', value: 'Senior' }
 ];
 
+interface Option {
+  label: string;
+  value: string;
+}
+
 export function TecnicalForm() {
-  const [isJobsTab, setIsJobsTab] = useState<boolean | null>(null);
+  const [isJobsTab, setIsJobsTab] = useState<boolean | undefined>(undefined);
 
   const { handleSubmit, control, watch, setValue, reset } = useForm<DeveloperFormValues>({
     defaultValues: {
@@ -125,8 +133,8 @@ export function TecnicalForm() {
             name="tab"
             control={control}
             render={({ field }) => (
-              <Autocomplete
-                value={tabOptions.find(option => option.value === field.value) || null}
+              <Autocomplete<Option>
+                value={tabOptions.find(option => option.value === field.value) || undefined}
                 onChange={(_, newValue) => field.onChange(newValue?.value || 'jobs')}
                 options={tabOptions}
                 getOptionLabel={(option) => option.label}
@@ -137,7 +145,6 @@ export function TecnicalForm() {
                     size="small"
                   />
                 )}
-                disableClearable
                 ListboxProps={{
                   style: { maxHeight: '200px' }
                 }}
@@ -202,24 +209,19 @@ export function TecnicalForm() {
                 name="seniority"
                 control={control}
                 render={({ field }) => (
-                  <Autocomplete
-                    value={seniorityOptions.find(option => option.value === field.value) || null}
-                    onChange={(_, newValue) => field.onChange(newValue?.value || 'Junior')}
-                    options={seniorityOptions}
-                    getOptionLabel={(option) => option.label}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Senioridade"
-                        size="small"
-                      />
-                    )}
-                    disableClearable
-                    ListboxProps={{
-                      style: { maxHeight: '200px' }
-                    }}
-                    sx={autocompleteStyles}
-                  />
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Senioridade</InputLabel>
+                    <Select
+                      {...field}
+                      label="Senioridade"
+                    >
+                      {seniorityOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 )}
               />
 
