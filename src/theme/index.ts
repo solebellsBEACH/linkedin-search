@@ -1,4 +1,4 @@
-import { createTheme, PaletteOptions } from '@mui/material/styles';
+import { createTheme, PaletteOptions, ThemeOptions } from '@mui/material/styles';
 
 const commonPalette = {
   primary: {
@@ -43,11 +43,11 @@ const darkPalette: PaletteOptions = {
   divider: 'rgba(255, 255, 255, 0.12)',
 };
 
-const commonOptions = {
+const commonOptions: ThemeOptions = {
   typography: {
     fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     button: {
-      textTransform: 'none',
+      textTransform: 'none' as const,
       fontWeight: 600,
     },
     h6: {

@@ -5,7 +5,6 @@ import {
   Box, 
   IconButton, 
   Tooltip,
-  tooltipClasses,
   styled
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -15,11 +14,8 @@ import { lightTheme, darkTheme } from './theme';
 import { useTheme } from './shared/hooks/useTheme';
 import './App.css';
 
-// Estilizar o tooltip para melhor visibilidade
-const StyledTooltip = styled(({ className, ...props }) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
+const CustomTooltip = styled(Tooltip)(({ theme }) => ({
+  '& .MuiTooltip-tooltip': {
     backgroundColor: theme.palette.mode === 'dark' ? '#fff' : '#333',
     color: theme.palette.mode === 'dark' ? '#333' : '#fff',
     fontSize: 12,
@@ -48,7 +44,7 @@ function App() {
           }
         }}
       >
-        <StyledTooltip 
+        <CustomTooltip 
           title={isDarkMode ? "Mudar para tema claro" : "Mudar para tema escuro"}
           placement="left"
           arrow
@@ -75,7 +71,7 @@ function App() {
               <Brightness4Icon fontSize="small" />
             )}
           </IconButton>
-        </StyledTooltip>
+        </CustomTooltip>
         <Box sx={{ mt: 3 }}>
           <TecnicalForm />
         </Box>
